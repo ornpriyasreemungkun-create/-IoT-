@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="th"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNjI1NTc5OTEyNzkzNTUwODkxNiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2JiMWY2MmM4ZDRjYjhlYjJfaW5kZXguaHRtbC0yMTkifSwiZXhwIjoxNzk0Njc3MjA3LCJpYXQiOjE3OTQ2NzM2MDcsImFsZyI6IlJTMjU2In0.RtPzhTbE524sGNgS65E9h-D9puBorFAc2fSQJ_RWvuNQ1kjxgWFvse4J7sCX35CXSIN5hTfZ3Nb5-EzzC-oSnq1qXjEpzLB8o15I6KNc5FxOeDEkmTTwOW8LdgxhMWY03zklYrr_kySyUQGE1vKIOj9qdYRO_I8-N-cvJWCNYW5CqvA-8trURD-U46nvNnhXHTBWjSI41uChhZQcrDx4F-GdhZEVlVoVL4uF9bo7SFuINaSByWPYX-QC2gMl79IoIUKr9Z0YMK9b2J22qkWs9-ziNTvGW3kD4fXTwih9Et-fWizzxDIW5kh_jQLSW1CF8rJLxYUxCaRUEmbNDmX9AQ","c_bb1f62c8d4cb8eb2_index.html-219")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบ IoT เพื่อการศึกษาในประเทศไทย - แฟลชการ์ด &amp; แบบทดสอบ</title>
+    <!-- โหลด Tailwind CSS สำหรับตกแต่งหน้าเว็บให้สวยงามและรองรับมือถือ -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- โหลดฟอนต์ภาษาไทย Prompt และ Sarabun จาก Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+    <!-- โหลดไอคอน Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+
+        /* เอฟเฟกต์พลิกการ์ด 3 มิติ (3D Flip Card) */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* ซ่อน Scrollbar แนวนอน */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.bottom-5{bottom:1.25rem}.right-5{right:1.25rem}.top-0{top:0px}.z-20{z-index:20}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-0\.5{margin-top:0.125rem}.mt-6{margin-top:1.5rem}.flex{display:flex}.hidden{display:none}.h-10{height:2.5rem}.h-2{height:0.5rem}.h-20{height:5rem}.h-3\.5{height:0.875rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-72{height:18rem}.h-full{height:100%}.h-7{height:1.75rem}.w-10{width:2.5rem}.w-20{width:5rem}.w-3\.5{width:0.875rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-full{width:100%}.w-7{width:1.75rem}.max-w-3xl{max-width:48rem}.max-w-4xl{max-width:56rem}.max-w-md{max-width:28rem}.max-w-xl{max-width:36rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.translate-y-20{--tw-translate-y:5rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:0.75rem}.rounded-lg{border-radius:0.5rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-indigo-100{--tw-border-opacity:1;border-color:rgb(224 231 255 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-indigo-100{--tw-bg-opacity:1;background-color:rgb(224 231 255 / var(--tw-bg-opacity, 1))}.bg-indigo-50{--tw-bg-opacity:1;background-color:rgb(238 242 255 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/15{background-color:rgb(255 255 255 / 0.15)}.bg-white\/80{background-color:rgb(255 255 255 / 0.8)}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.from-indigo-600{--tw-gradient-from:#4f46e5 var(--tw-gradient-from-position);--tw-gradient-to:rgb(79 70 229 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-blue-700{--tw-gradient-to:#1d4ed8 var(--tw-gradient-to-position)}.p-1\.5{padding:0.375rem}.p-2{padding:0.5rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.text-left{text-align:left}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.leading-snug{line-height:1.375}.tracking-wider{letter-spacing:0.05em}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-indigo-200{--tw-text-opacity:1;color:rgb(199 210 254 / var(--tw-text-opacity, 1))}.text-indigo-500{--tw-text-opacity:1;color:rgb(99 102 241 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-0{opacity:0}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-indigo-200{--tw-shadow-color:#c7d2fe;--tw-shadow:var(--tw-shadow-colored)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.hover\:border-indigo-400:hover{--tw-border-opacity:1;border-color:rgb(129 140 248 / var(--tw-border-opacity, 1))}.hover\:bg-emerald-700:hover{--tw-bg-opacity:1;background-color:rgb(4 120 87 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-200:hover{--tw-bg-opacity:1;background-color:rgb(199 210 254 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-700:hover{--tw-bg-opacity:1;background-color:rgb(67 56 202 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-50\/50:hover{background-color:rgb(238 242 255 / 0.5)}.hover\:text-indigo-600:hover{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.disabled\:pointer-events-none:disabled{pointer-events:none}.disabled\:opacity-40:disabled{opacity:0.4}.group:hover .group-hover\:bg-indigo-100{--tw-bg-opacity:1;background-color:rgb(224 231 255 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}@media (min-width: 640px){.sm\:inline{display:inline}.sm\:h-80{height:20rem}.sm\:flex-none{flex:none}.sm\:flex-row{flex-direction:row}.sm\:p-8{padding:2rem}.sm\:py-8{padding-top:2rem;padding-bottom:2rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}}</style></head>
+<body class="text-slate-800 flex flex-col justify-between">
+
+    <!-- ส่วนหัวของเว็บไซต์ (Header) -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-20 border-b border-indigo-100">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md shadow-indigo-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="cpu" aria-hidden="true" class="lucide lucide-cpu w-6 h-6"><path d="M12 20v2"></path><path d="M12 2v2"></path><path d="M17 20v2"></path><path d="M17 2v2"></path><path d="M2 12h2"></path><path d="M2 17h2"></path><path d="M2 7h2"></path><path d="M20 12h2"></path><path d="M20 17h2"></path><path d="M20 7h2"></path><path d="M7 20v2"></path><path d="M7 2v2"></path><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="8" y="8" width="8" height="8" rx="1"></rect></svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg text-slate-900 leading-tight">ระบบ IoT เพื่อการศึกษา</h1>
+                    <p class="text-xs text-slate-500">สื่อทบทวนความรู้ &amp; แบบทดสอบ 10 ข้อ</p>
+                </div>
+            </div>
+
+            <!-- ปุ่มดาวน์โหลดไฟล์สำหรับเอาไปขึ้น GitHub Pages -->
+            <button onclick="downloadHTML()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl shadow-sm transition cursor-pointer" title="ดาวน์โหลดไฟล์นี้ไปอัปโหลดขึ้น GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="download" aria-hidden="true" class="lucide lucide-download w-4 h-4"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg>
+                <span>โหลดไฟล์ขึ้น GitHub</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- เนื้อหาหลัก (Main Content) -->
+    <main class="flex-grow max-w-3xl w-full mx-auto px-4 py-6 sm:py-8 flex flex-col items-center">
+
+        <!-- แถบสลับโหมด (Mode Switcher Tabs) -->
+        <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-indigo-100 flex w-full max-w-md mb-6">
+            <button id="tab-flashcard" onclick="switchMode('flashcard')" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all bg-indigo-600 text-white shadow-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layers" aria-hidden="true" class="lucide lucide-layers w-4 h-4"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"></path><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"></path><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"></path></svg>
+                <span>โหมดแฟลชการ์ด</span>
+            </button>
+            <button id="tab-quiz" onclick="switchMode('quiz')" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-indigo-600 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="help-circle" aria-hidden="true" class="lucide lucide-help-circle w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="M9 9.5a3 2.5 0 016 0c0 2-2 2-3 3.5"></path><path d="M12 17h.01"></path></svg>
+                <span>โหมดทดสอบ</span>
+            </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- ส่วนที่ 1: โหมดแฟลชการ์ด (FLASHCARD MODE) -->
+        <!-- ========================================== -->
+        <section id="section-flashcard" class="w-full flex flex-col items-center">
+            <!-- แถบแสดงความคืบหน้าและตัวนับข้อ -->
+            <div class="w-full max-w-xl flex items-center justify-between mb-3 px-1">
+                <span class="text-sm font-medium text-indigo-700 bg-indigo-100 px-3 py-1 rounded-full">
+                    การ์ดใบที่ <span id="fc-counter">1 / 10</span>
+                </span>
+                <span class="text-xs text-slate-500 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="touchpad" aria-hidden="true" class="lucide lucide-touchpad w-3.5 h-3.5"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="M2 14h20"></path><path d="M12 20v-6"></path></svg> แตะที่การ์ดเพื่อพลิกดูคำอธิบาย
+                </span>
+            </div>
+
+            <!-- ตัวการ์ด 3 มิติ -->
+            <div class="w-full max-w-xl h-72 sm:h-80 perspective-1000 cursor-pointer mb-6" onclick="flipCard()">
+                <div id="flashcard-inner" class="relative w-full h-full transform-style-3d shadow-xl rounded-3xl">
+                    
+                    <!-- ด้านหน้าการ์ด (หัวข้อ / คำศัพท์) -->
+                    <div class="absolute inset-0 backface-hidden bg-white rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center border-2 border-indigo-100">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full mb-4">
+                            หัวข้อ / แนวคิดหลัก
+                        </span>
+                        <h2 id="fc-front-text" class="text-xl sm:text-2xl font-bold text-slate-800 leading-relaxed">แนวทางการเรียนรู้ IoT ในไทย</h2>
+                        <div class="mt-6 text-xs text-slate-400 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="rotate-cw" aria-hidden="true" class="lucide lucide-rotate-cw w-3.5 h-3.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg> คลิกเพื่อพลิกดูความหมาย
+                        </div>
+                    </div>
+
+                    <!-- ด้านหลังการ์ด (คำอธิบาย / รายละเอียด) -->
+                    <div class="absolute inset-0 backface-hidden card-back bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-inner">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-indigo-200 bg-white/15 px-3 py-1 rounded-full mb-4">
+                            คำอธิบาย / รายละเอียด
+                        </span>
+                        <p id="fc-back-text" class="text-base sm:text-lg font-normal leading-relaxed">เน้นการเรียนรู้ผ่านการลงมือปฏิบัติในรายวิชาวิทยาการคำนวณและโครงงาน STEM ด้วยบอร์ดราคาประหยัด (เช่น KidBright, ESP32) เพื่อแก้ปัญหาใกล้ตัว</p>
+                        <div class="mt-6 text-xs text-indigo-200 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="rotate-ccw" aria-hidden="true" class="lucide lucide-rotate-ccw w-3.5 h-3.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg> คลิกเพื่อพลิกกลับ
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ปุ่มควบคุมการเลื่อนการ์ด -->
+            <div class="flex items-center justify-center gap-4 w-full max-w-xl">
+                <button id="btn-prev-card" onclick="prevCard()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none text-slate-700 font-medium py-3 px-6 rounded-2xl shadow-sm border border-slate-200 transition cursor-pointer" disabled="">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-left" aria-hidden="true" class="lucide lucide-chevron-left w-5 h-5"><path d="m15 18-6-6 6-6"></path></svg>
+                    <span>ก่อนหน้า</span>
+                </button>
+
+                <button onclick="flipCard()" class="flex items-center justify-center gap-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-3 px-5 rounded-2xl transition cursor-pointer" title="พลิกการ์ด">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="refresh-cw" aria-hidden="true" class="lucide lucide-refresh-cw w-5 h-5"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
+                    <span class="hidden sm:inline">พลิกการ์ด</span>
+                </button>
+
+                <button id="btn-next-card" onclick="nextCard()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none text-white font-medium py-3 px-6 rounded-2xl shadow-md shadow-indigo-200 transition cursor-pointer">
+                    <span>ถัดไป</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-5 h-5"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- ส่วนที่ 2: โหมดทดสอบ (QUIZ MODE)          -->
+        <!-- ========================================== -->
+        <section id="section-quiz" class="w-full max-w-xl hidden">
+            
+            <!-- หน้าจอทำข้อสอบ -->
+            <div id="quiz-play-area" class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-indigo-100">
+                <!-- แถบสถานะข้อสอบ -->
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-semibold text-indigo-700 bg-indigo-50 px-3.5 py-1 rounded-full">
+                        ข้อที่ <span id="quiz-current-num">1</span> จาก 10
+                    </span>
+                    <span class="text-sm font-semibold text-emerald-700 bg-emerald-50 px-3.5 py-1 rounded-full">
+                        คะแนน: <span id="quiz-score">0</span>
+                    </span>
+                </div>
+
+                <!-- แถบ Progress Bar -->
+                <div class="w-full bg-slate-100 h-2 rounded-full mb-6 overflow-hidden">
+                    <div id="quiz-progress-bar" class="bg-indigo-600 h-full transition-all duration-300" style="width: 10%"></div>
+                </div>
+
+                <!-- โจทย์คำถาม -->
+                <h2 id="quiz-question-text" class="text-lg sm:text-xl font-bold text-slate-800 mb-6 leading-relaxed">ในบริบทของการศึกษาในประเทศไทย เหตุใดสถานศึกษาจึงนิยมใช้บอร์ดไมโครคอนโทรลเลอร์ขนาดเล็ก (เช่น KidBright หรือ ESP32) มากกว่าการวางระบบอัตโนมัติขนาดใหญ่?</h2>
+
+                <!-- รายการตัวเลือก 4 ข้อ -->
+                <div id="quiz-options-container" class="space-y-3 mb-6"><button class="w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 transition flex items-start gap-3 cursor-pointer group">
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-indigo-100 text-slate-600 group-hover:text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5 transition">
+                        ก
+                    </span>
+                    <span class="text-sm sm:text-base text-slate-700 font-medium leading-snug">เพราะกฎหมายบังคับให้ใช้เฉพาะบอร์ดขนาดเล็กในสถานศึกษาเท่านั้น</span>
+                </button><button class="w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 transition flex items-start gap-3 cursor-pointer group">
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-indigo-100 text-slate-600 group-hover:text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5 transition">
+                        ข
+                    </span>
+                    <span class="text-sm sm:text-base text-slate-700 font-medium leading-snug">เพื่อใช้แทนเครื่องคอมพิวเตอร์ตั้งโต๊ะในห้องปฏิบัติการทั้งหมด</span>
+                </button><button class="w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 transition flex items-start gap-3 cursor-pointer group">
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-indigo-100 text-slate-600 group-hover:text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5 transition">
+                        ค
+                    </span>
+                    <span class="text-sm sm:text-base text-slate-700 font-medium leading-snug">เพราะบอร์ดขนาดเล็กมีกำลังประมวลผลสูงกว่าเซิร์ฟเวอร์ขนาดใหญ่</span>
+                </button><button class="w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 transition flex items-start gap-3 cursor-pointer group">
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-indigo-100 text-slate-600 group-hover:text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5 transition">
+                        ง
+                    </span>
+                    <span class="text-sm sm:text-base text-slate-700 font-medium leading-snug">เน้นการเรียนรู้ผ่านการลงมือปฏิบัติและการสร้างชิ้นงานต้นแบบเพื่อแก้ปัญหาใกล้ตัว</span>
+                </button></div>
+
+                <!-- กล่องแสดงผลการตรวจและเฉลย -->
+                <div id="quiz-feedback" class="hidden rounded-2xl p-4 mb-6 text-sm">
+                    <div class="flex items-start gap-3">
+                        <div id="feedback-icon" class="mt-0.5"></div>
+                        <div>
+                            <p id="feedback-title" class="font-bold text-base mb-1"></p>
+                            <p id="feedback-explanation" class="text-slate-600 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ปุ่มไปข้อถัดไป -->
+                <button id="btn-next-question" onclick="nextQuestion()" class="hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 px-6 rounded-2xl shadow-md shadow-indigo-200 transition flex items-center justify-center gap-2 cursor-pointer">
+                    <span id="btn-next-q-text">ข้อถัดไป</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true" class="lucide lucide-arrow-right w-5 h-5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                </button>
+            </div>
+
+            <!-- หน้าจอสรุปคะแนนตอนจบ -->
+            <div id="quiz-result-area" class="hidden bg-white rounded-3xl p-8 shadow-xl border border-indigo-100 text-center">
+                <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="award" aria-hidden="true" class="lucide lucide-award w-10 h-10"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"></path><circle cx="12" cy="8" r="6"></circle></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">ทำแบบทดสอบเสร็จสิ้น!</h2>
+                <p id="result-message" class="text-slate-500 mb-6">ยอดเยี่ยมมาก! คุณเข้าใจพื้นฐานระบบ IoT เป็นอย่างดี</p>
+
+                <div class="bg-slate-50 rounded-2xl p-6 mb-8 border border-slate-100">
+                    <p class="text-sm text-slate-500 mb-1">คะแนนรวมของคุณ</p>
+                    <div class="text-4xl font-extrabold text-indigo-600">
+                        <span id="final-score">0</span> <span class="text-xl font-medium text-slate-400">/ 10</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button onclick="restartQuiz()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 px-6 rounded-2xl shadow-md shadow-indigo-200 transition flex items-center justify-center gap-2 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="rotate-ccw" aria-hidden="true" class="lucide lucide-rotate-ccw w-5 h-5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                        <span>ทำแบบทดสอบอีกครั้ง</span>
+                    </button>
+                    <button onclick="switchMode('flashcard')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3.5 px-6 rounded-2xl transition flex items-center justify-center gap-2 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layers" aria-hidden="true" class="lucide lucide-layers w-5 h-5"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"></path><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"></path><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"></path></svg>
+                        <span>กลับไปทบทวนแฟลชการ์ด</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ส่วนท้าย (Footer) -->
+    <footer class="text-center py-4 text-xs text-slate-400">
+        สื่อการเรียนรู้ระบบ IoT เพื่อการศึกษาในประเทศไทย • พร้อมใช้งานบน GitHub Pages
+    </footer>
+
+    <!-- กล่องข้อความแจ้งเตือน (แทน alert) -->
+    <div id="toast-msg" class="fixed bottom-5 right-5 bg-slate-800 text-white text-sm px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle" aria-hidden="true" class="lucide lucide-check-circle w-4 h-4 text-emerald-400"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>
+        <span id="toast-text">ดาวน์โหลดไฟล์สำเร็จ!</span>
+    </div>
+
+    <!-- สคริปต์การทำงานทั้งหมด -->
+    <script>
+        // ข้อมูลชุดการเรียนรู้ระบบ IoT เพื่อการศึกษา 10 ข้อ
+        const iotData = [
+            {
+                topic: "แนวทางการเรียนรู้ IoT ในไทย",
+                description: "เน้นการเรียนรู้ผ่านการลงมือปฏิบัติในรายวิชาวิทยาการคำนวณและโครงงาน STEM ด้วยบอร์ดราคาประหยัด (เช่น KidBright, ESP32) เพื่อแก้ปัญหาใกล้ตัว",
+                question: "ในบริบทของการศึกษาในประเทศไทย เหตุใดสถานศึกษาจึงนิยมใช้บอร์ดไมโครคอนโทรลเลอร์ขนาดเล็ก (เช่น KidBright หรือ ESP32) มากกว่าการวางระบบอัตโนมัติขนาดใหญ่?",
+                answer: "เน้นการเรียนรู้ผ่านการลงมือปฏิบัติและการสร้างชิ้นงานต้นแบบเพื่อแก้ปัญหาใกล้ตัว",
+                options: [
+                    "เน้นการเรียนรู้ผ่านการลงมือปฏิบัติและการสร้างชิ้นงานต้นแบบเพื่อแก้ปัญหาใกล้ตัว",
+                    "เพราะบอร์ดขนาดเล็กมีกำลังประมวลผลสูงกว่าเซิร์ฟเวอร์ขนาดใหญ่",
+                    "เพื่อใช้แทนเครื่องคอมพิวเตอร์ตั้งโต๊ะในห้องปฏิบัติการทั้งหมด",
+                    "เพราะกฎหมายบังคับให้ใช้เฉพาะบอร์ดขนาดเล็กในสถานศึกษาเท่านั้น"
+                ]
+            },
+            {
+                topic: "เซนเซอร์ (Sensors)",
+                description: "ทำหน้าที่รับค่าทางกายภาพจากสภาพแวดล้อมและแปลงเป็นสัญญาณดิจิทัล เช่น เซนเซอร์วัดความชื้นในดิน",
+                question: "หากนักเรียนต้องการสร้างโครงงาน 'โรงเรือนเพาะเห็ดอัตโนมัติ' ที่มีการวัดค่าความชื้น อุปกรณ์ใดทำหน้าที่รับค่าดังกล่าว?",
+                answer: "เซนเซอร์วัดความชื้นในดิน",
+                options: [
+                    "เซนเซอร์วัดความชื้นในดิน",
+                    "ลำโพงบัซเซอร์ (Buzzer)",
+                    "โมดูลรีเลย์ (Relay Module)",
+                    "หลอดไฟ LED แสดงสถานะ"
+                ]
+            },
+            {
+                topic: "ตัวสั่งการ (Actuators)",
+                description: "ทำหน้าที่รับคำสั่งจากบอร์ดควบคุมไปทำให้งานทางกายภาพเกิดขึ้นจริง เช่น รีเลย์ และลำโพงบัซเซอร์",
+                question: "ในโครงงานตรวจวัดฝุ่น PM 2.5 อุปกรณ์ใดทำหน้าที่เป็นตัวสั่งการ (Actuator) เพื่อส่งเสียงเตือนเมื่อค่าฝุ่นเกินกำหนด?",
+                answer: "ลำโพงบัซเซอร์ (Buzzer)",
+                options: [
+                    "ลำโพงบัซเซอร์ (Buzzer)",
+                    "เซนเซอร์ตรวจจับฝุ่นละออง",
+                    "สายเชื่อมต่อ USB",
+                    "โมดูลรับสัญญาณ Wi-Fi"
+                ]
+            },
+            {
+                topic: "ระบบเครือข่ายและการเชื่อมต่อ (Network & Connectivity)",
+                description: "ใช้ Wi-Fi หรือตั้งเราเตอร์แยกในห้องปฏิบัติการเพื่อหลีกเลี่ยงข้อจำกัดระบบความปลอดภัย (Firewall) ของโรงเรียน",
+                question: "ทำไมห้องปฏิบัติการคอมพิวเตอร์ในโรงเรียนมักต้องตั้งเราเตอร์ Wi-Fi แยกเฉพาะสำหรับการทดลอง IoT?",
+                answer: "เพื่อหลีกเลี่ยงข้อจำกัดและระบบความปลอดภัย (Firewall) ของเครือข่ายกลางโรงเรียน",
+                options: [
+                    "เพื่อหลีกเลี่ยงข้อจำกัดและระบบความปลอดภัย (Firewall) ของเครือข่ายกลางโรงเรียน",
+                    "เพราะบอร์ด IoT ไม่สามารถรับสัญญาณอินเทอร์เน็ตความเร็วสูงได้",
+                    "เพื่อประหยัดค่าไฟฟ้าในห้องปฏิบัติการคอมพิวเตอร์",
+                    "เพราะเครือข่ายกลางโรงเรียนรองรับเฉพาะระบบปฏิบัติการ Windows"
+                ]
+            },
+            {
+                topic: "การประมวลผลที่ขอบเครือข่าย (Edge Processing)",
+                description: "การประมวลผลบนตัวบอร์ดไมโครคอนโทรลเลอร์ ช่วยให้ระบบสั่งการได้ทันทีแม้สัญญาณอินเทอร์เน็ตขัดข้อง",
+                question: "ระบบประมวลผลแบบใดที่ช่วยให้โครงงาน IoT สั่งเปิดปั๊มน้ำได้ทันที แม้อินเทอร์เน็ตโรงเรียนจะล่ม?",
+                answer: "Edge Processing บนตัวบอร์ดไมโครคอนโทรลเลอร์",
+                options: [
+                    "Edge Processing บนตัวบอร์ดไมโครคอนโทรลเลอร์",
+                    "Cloud Analytics บนเซิร์ฟเวอร์ต่างประเทศ",
+                    "การส่งข้อความแจ้งเตือนผ่านแอปพลิเคชันแชต",
+                    "การสำรองข้อมูลลงฐานข้อมูลออนไลน์"
+                ]
+            },
+            {
+                topic: "แพลตฟอร์มคลาวด์ NETPIE",
+                description: "แพลตฟอร์มคลาวด์สำหรับ IoT ที่พัฒนาขึ้นโดยคนไทย นิยมใช้เก็บข้อมูลและแสดงผลสำหรับโครงงานนักเรียน",
+                question: "แพลตฟอร์มคลาวด์สำหรับ IoT ใดที่พัฒนาขึ้นโดยคนไทยและนิยมใช้ในโครงงานนักเรียน?",
+                answer: "NETPIE",
+                options: [
+                    "NETPIE",
+                    "Google Classroom",
+                    "Microsoft Word",
+                    "Adobe Photoshop"
+                ]
+            },
+            {
+                topic: "การแจ้งเตือนผ่าน LINE Notify",
+                description: "เทคโนโลยีเชื่อมต่อเพื่อส่งข้อความแจ้งเตือนเข้าสมาร์ตโฟนส่วนตัวทันทีเมื่อเกิดเหตุการณ์สำคัญในระบบ",
+                question: "หากนักเรียนต้องการส่งข้อความแจ้งเตือนเข้าสมาร์ตโฟนทันทีเมื่อระดับน้ำต่ำกว่าเกณฑ์ ควรใช้เทคโนโลยีใด?",
+                answer: "LINE Notify หรือ Telegram Bot",
+                options: [
+                    "LINE Notify หรือ Telegram Bot",
+                    "การเชื่อมต่อสาย LAN เข้ากับโทรศัพท์",
+                    "การบันทึกไฟล์ลงในแผ่นซีดี",
+                    "การส่งสัญญาณบลูทูธระยะ 1 เมตร"
+                ]
+            },
+            {
+                topic: "การสื่อสารระยะใกล้ (Bluetooth / คลื่นวิทยุ)",
+                description: "คุณสมบัติที่ฮาร์ดแวร์เลือกใช้เมื่อต้องการให้บอร์ดไมโครคอนโทรลเลอร์สื่อสารกันเองภายในห้องเรียน",
+                question: "ในโครงงานหุ่นยนต์ขนาดเล็กภายในห้องเรียนที่ต้องการสื่อสารระหว่างบอร์ด ฮาร์ดแวร์มักใช้สัญญาณใด?",
+                answer: "สัญญาณ Bluetooth หรือคลื่นวิทยุ",
+                options: [
+                    "สัญญาณ Bluetooth หรือคลื่นวิทยุ",
+                    "สัญญาณดาวเทียมวงโคจรต่ำ",
+                    "สายเคเบิลใยแก้วนำแสงใต้น้ำ",
+                    "เครือข่ายโทรศัพท์มือถือ 5G"
+                ]
+            },
+            {
+                topic: "การประมวลผลและจัดเก็บข้อมูลบนคลาวด์ (Cloud Analytics)",
+                description: "การส่งข้อมูลย้อนหลังไปเก็บไว้บนคลาวด์เพื่อนำไปพล็อตกราฟเปรียบเทียบและวิเคราะห์แนวโน้มตลอดภาคการศึกษา",
+                question: "การส่งข้อมูลขึ้นไปเก็บบนคลาวด์มีประโยชน์อย่างไรต่อการทำรายงานโครงงาน?",
+                answer: "นำไปพล็อตกราฟเปรียบเทียบและวิเคราะห์แนวโน้มตลอดภาคการศึกษา",
+                options: [
+                    "นำไปพล็อตกราฟเปรียบเทียบและวิเคราะห์แนวโน้มตลอดภาคการศึกษา",
+                    "ช่วยให้บอร์ดไมโครคอนโทรลเลอร์ทำงานได้โดยไม่ต้องเสียบปลั๊กไฟ",
+                    "ทำให้เซนเซอร์วัดค่าได้แม่นยำขึ้นโดยไม่ต้องสอบเทียบ",
+                    "ช่วยป้องกันไม่ให้บอร์ดเปียกน้ำหรือชำรุดเสียหาย"
+                ]
+            },
+            {
+                topic: "องค์ประกอบหลัก 4 ส่วนของระบบ IoT",
+                description: "ลำดับการทำงานประกอบด้วย 1. อุปกรณ์เซนเซอร์ -> 2. เครือข่ายและการเชื่อมต่อ -> 3. การประมวลผล/จัดเก็บ -> 4. การแสดงผล",
+                question: "ลำดับการทำงานที่ต่อเนื่องกันขององค์ประกอบหลัก 4 ส่วนในระบบ IoT เริ่มจากส่วนใดไปสิ้นสุดที่ส่วนใด?",
+                answer: "อุปกรณ์เซนเซอร์ -> เครือข่ายและการเชื่อมต่อ -> การประมวลผล/จัดเก็บ -> การแสดงผล",
+                options: [
+                    "อุปกรณ์เซนเซอร์ -> เครือข่ายและการเชื่อมต่อ -> การประมวลผล/จัดเก็บ -> การแสดงผล",
+                    "การแสดงผล -> การประมวลผล/จัดเก็บ -> เครือข่ายและการเชื่อมต่อ -> อุปกรณ์เซนเซอร์",
+                    "เครือข่ายและการเชื่อมต่อ -> การแสดงผล -> อุปกรณ์เซนเซอร์ -> การประมวลผล/จัดเก็บ",
+                    "การประมวลผล/จัดเก็บ -> อุปกรณ์เซนเซอร์ -> การแสดงผล -> เครือข่ายและการเชื่อมต่อ"
+                ]
+            }
+        ];
+
+        // ตัวแปรสถานะ (State)
+        let currentCardIndex = 0;
+        let isCardFlipped = false;
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let hasAnsweredCurrent = false;
+        let shuffledQuizData = [];
+
+        // เริ่มต้นทำงานเมื่อโหลดหน้าเว็บ
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderFlashcard();
+            initQuiz();
+        });
+
+        // ฟังก์ชันสลับโหมดระหว่าง แฟลชการ์ด และ แบบทดสอบ
+        function switchMode(mode) {
+            const tabFc = document.getElementById('tab-flashcard');
+            const tabQuiz = document.getElementById('tab-quiz');
+            const secFc = document.getElementById('section-flashcard');
+            const secQuiz = document.getElementById('section-quiz');
+
+            if (mode === 'flashcard') {
+                tabFc.className = "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all bg-indigo-600 text-white shadow-sm cursor-pointer";
+                tabQuiz.className = "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-indigo-600 cursor-pointer";
+                secFc.classList.remove('hidden');
+                secQuiz.classList.add('hidden');
+            } else {
+                tabQuiz.className = "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all bg-indigo-600 text-white shadow-sm cursor-pointer";
+                tabFc.className = "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-indigo-600 cursor-pointer";
+                secQuiz.classList.remove('hidden');
+                secFc.classList.add('hidden');
+            }
+        }
+
+        // ==========================================
+        // ฟังก์ชันสำหรับโหมดแฟลชการ์ด (Flashcard Logic)
+        // ==========================================
+        function renderFlashcard() {
+            const item = iotData[currentCardIndex];
+            const cardInner = document.getElementById('flashcard-inner');
+            
+            // รีเซ็ตการพลิกการ์ดให้กลับมาด้านหน้าเสมอเมื่อเปลี่ยนข้อ
+            isCardFlipped = false;
+            cardInner.classList.remove('rotate-y-180');
+
+            // อัปเดตข้อความและตัวนับ
+            document.getElementById('fc-counter').textContent = `${currentCardIndex + 1} / ${iotData.length}`;
+            document.getElementById('fc-front-text').textContent = item.topic;
+            document.getElementById('fc-back-text').textContent = item.description;
+
+            // จัดการสถานะปุ่มก่อนหน้า / ถัดไป
+            document.getElementById('btn-prev-card').disabled = (currentCardIndex === 0);
+            document.getElementById('btn-next-card').disabled = (currentCardIndex === iotData.length - 1);
+        }
+
+        function flipCard() {
+            const cardInner = document.getElementById('flashcard-inner');
+            isCardFlipped = !isCardFlipped;
+            if (isCardFlipped) {
+                cardInner.classList.add('rotate-y-180');
+            } else {
+                cardInner.classList.remove('rotate-y-180');
+            }
+        }
+
+        function nextCard() {
+            if (currentCardIndex < iotData.length - 1) {
+                currentCardIndex++;
+                renderFlashcard();
+            }
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                renderFlashcard();
+            }
+        }
+
+        // ==========================================
+        // ฟังก์ชันสำหรับโหมดทดสอบ (Quiz Logic)
+        // ==========================================
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function initQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            // สลับลำดับตัวเลือกในแต่ละข้อเพื่อไม่ให้จำตำแหน่ง
+            shuffledQuizData = iotData.map(item => ({
+                ...item,
+                shuffledOptions: shuffleArray(item.options)
+            }));
+
+            document.getElementById('quiz-play-area').classList.remove('hidden');
+            document.getElementById('quiz-result-area').classList.add('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            hasAnsweredCurrent = false;
+            const currentQ = shuffledQuizData[currentQuizIndex];
+
+            // อัปเดตตัวเลขและ Progress bar
+            document.getElementById('quiz-current-num').textContent = currentQuizIndex + 1;
+            document.getElementById('quiz-score').textContent = quizScore;
+            const progressPercent = ((currentQuizIndex + 1) / shuffledQuizData.length) * 100;
+            document.getElementById('quiz-progress-bar').style.width = `${progressPercent}%`;
+
+            // แสดงโจทย์
+            document.getElementById('quiz-question-text').textContent = currentQ.question;
+
+            // ซ่อนกล่องเฉลยและปุ่มข้อถัดไป
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('btn-next-question').classList.add('hidden');
+
+            // สร้างปุ่มตัวเลือก 4 ข้อ
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+
+            const labels = ['ก', 'ข', 'ค', 'ง'];
+            currentQ.shuffledOptions.forEach((optionText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 transition flex items-start gap-3 cursor-pointer group";
+                btn.onclick = () => selectAnswer(btn, optionText);
+
+                btn.innerHTML = `
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-indigo-100 text-slate-600 group-hover:text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5 transition">
+                        ${labels[idx]}
+                    </span>
+                    <span class="text-sm sm:text-base text-slate-700 font-medium leading-snug">${optionText}</span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(selectedBtn, selectedText) {
+            if (hasAnsweredCurrent) return;
+            hasAnsweredCurrent = true;
+
+            const currentQ = shuffledQuizData[currentQuizIndex];
+            const isCorrect = (selectedText === currentQ.answer);
+            const allButtons = document.getElementById('quiz-options-container').querySelectorAll('button');
+
+            // ปิดการกดปุ่มอื่นและไฮไลต์เฉลย
+            allButtons.forEach(btn => {
+                btn.classList.remove('hover:border-indigo-400', 'hover:bg-indigo-50/50', 'cursor-pointer');
+                btn.classList.add('cursor-default');
+                const btnText = btn.querySelector('span:last-child').textContent;
+
+                if (btnText === currentQ.answer) {
+                    // ไฮไลต์ข้อที่ถูกต้องด้วยสีเขียว
+                    btn.classList.remove('border-slate-200');
+                    btn.classList.add('border-emerald-500', 'bg-emerald-50');
+                    btn.querySelector('span:first-child').className = "w-7 h-7 rounded-lg bg-emerald-500 text-white font-bold text-sm flex items-center justify-center shrink-0 mt-0.5";
+                } else if (btn === selectedBtn && !isCorrect) {
+                    // ไฮไลต์ข้อที่เลือกผิดด้วยสีแดง
+                    btn.classList.remove('border-slate-200');
+                    btn.classList.add('border-rose-500', 'bg-rose-50');
+                    btn.querySelector('span:first-child').className = "w-7 h-7 rounded-lg bg-rose-500 text-white font-bold text-sm flex items-center justify-center shrink-0 mt-0.5";
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            // แสดงกล่อง Feedback
+            const feedbackBox = document.getElementById('quiz-feedback');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackExp = document.getElementById('feedback-explanation');
+
+            feedbackBox.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-900', 'bg-rose-50', 'text-rose-900');
+
+            if (isCorrect) {
+                quizScore++;
+                document.getElementById('quiz-score').textContent = quizScore;
+                feedbackBox.classList.add('bg-emerald-50', 'text-emerald-900');
+                feedbackIcon.innerHTML = `<i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-600"></i>`;
+                feedbackTitle.textContent = "ถูกต้องครับ! เก่งมาก";
+            } else {
+                feedbackBox.classList.add('bg-rose-50', 'text-rose-900');
+                feedbackIcon.innerHTML = `<i data-lucide="x-circle" class="w-6 h-6 text-rose-600"></i>`;
+                feedbackTitle.textContent = "ยังไม่ถูกต้องครับ";
+            }
+
+            feedbackExp.textContent = `คำอธิบายเพิ่มเติม: ${currentQ.description}`;
+            lucide.createIcons();
+
+            // แสดงปุ่มข้อถัดไป
+            const nextBtn = document.getElementById('btn-next-question');
+            const nextBtnText = document.getElementById('btn-next-q-text');
+            nextBtn.classList.remove('hidden');
+            nextBtnText.textContent = (currentQuizIndex === shuffledQuizData.length - 1) ? "ดูสรุปคะแนน" : "ข้อถัดไป";
+        }
+
+        function nextQuestion() {
+            if (currentQuizIndex < shuffledQuizData.length - 1) {
+                currentQuizIndex++;
+                renderQuestion();
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            document.getElementById('quiz-play-area').classList.add('hidden');
+            document.getElementById('quiz-result-area').classList.remove('hidden');
+            document.getElementById('final-score').textContent = quizScore;
+
+            const msgEl = document.getElementById('result-message');
+            if (quizScore >= 8) {
+                msgEl.textContent = "สุดยอดมาก! คุณแม่นยำเรื่องระบบ IoT เพื่อการศึกษาแบบเต็มร้อยเลยครับ";
+            } else if (quizScore >= 5) {
+                msgEl.textContent = "ทำได้ดีมาก! ลองทบทวนแฟลชการ์ดอีกนิดรับรองได้เต็มแน่นอน";
+            } else {
+                msgEl.textContent = "ไม่เป็นไรครับ ลองกลับไปอ่านทบทวนในโหมดแฟลชการ์ดแล้วมาลุยใหม่นะ!";
+            }
+        }
+
+        function restartQuiz() {
+            initQuiz();
+        }
+
+        // ==========================================
+        // ฟังก์ชันดาวน์โหลดไฟล์ index.html เพื่อนำไปขึ้น GitHub
+        // ==========================================
+        function downloadHTML() {
+            const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "index.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast("ดาวน์โหลดไฟล์ index.html เรียบร้อย! พร้อมอัปโหลดขึ้น GitHub");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-msg');
+            document.getElementById('toast-text').textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+    </script>
+
+</body></html>
